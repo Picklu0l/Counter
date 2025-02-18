@@ -533,10 +533,72 @@
                 max-width: none !important;
             }
         }
+
+        /* Add YouTube section styles */
+        .youtube-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .youtube-section h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media screen and (max-width: 480px) {
+            .video-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (min-width: 481px) {
+            .video-list {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
     </style>
 </head>
 <body>
     <div id="homeScreen" class="home-buttons">
+        <div class="live-stream-container" style="margin-bottom: 1rem;">
+            <h2 style="text-align: center; margin-bottom: 1rem;">🔴 Live Stream</h2>
+            <div class="video-container">
+                <iframe
+                    src="https://www.youtube.com/embed/live_stream?channel=UCxN9_iczX0aQx0sPXrE0_kw&autoplay=1&mute=0"
+                    title="Lottery Sambad Live"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
         <div class="date-display" id="dateDisplay"></div>
         <div class="section-buttons">
         <button onclick="showGrid('Morning')">Morning</button>
@@ -683,6 +745,19 @@
                     <li>Tap "Add" to confirm</li>
                 </ul>
             </div>
+        </div>
+    </div>
+
+    <!-- Channel Videos Section -->
+    <div class="youtube-section">
+        <h2>Channel Videos</h2>
+        <div class="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/?listType=user_uploads&list=UCxN9_iczX0aQx0sPXrE0_kw"
+                title="Lottery Sambad Channel"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
         </div>
     </div>
 
