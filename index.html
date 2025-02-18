@@ -590,15 +590,10 @@
 </head>
 <body>
     <div id="homeScreen" class="home-buttons">
-        <div class="live-stream-container" style="margin-bottom: 1rem;">
-            <h2 style="text-align: center; margin-bottom: 1rem;">🔴 Live Stream</h2>
+        <div class="live-stream-container" id="liveStreamContainer" style="margin-bottom: 1rem; display: none;">
+            <h2 style="text-align: center; margin-bottom: 1rem;">🔴 Live Now</h2>
             <div class="video-container">
-                <iframe
-                    src="https://www.youtube.com/embed/live_stream?channel=UCxN9_iczX0aQx0sPXrE0_kw&autoplay=1&mute=0"
-                    title="Lottery Sambad Live"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
+                <div id="player"></div>
             </div>
         </div>
         <div class="date-display" id="dateDisplay"></div>
@@ -701,7 +696,7 @@
             <button onclick="exportAsImage()" style="width: 50px; min-width: 50px;"><i class="fas fa-image"></i></button>
             <button onclick="shareViaWhatsApp()" style="width: 50px; min-width: 50px;"><i class="fab fa-whatsapp"></i></button>
             <button onclick="showInstallInstructions()" style="width: 50px; min-width: 50px;"><i class="fas fa-download"></i></button>
-        </div>
+            </div>
     </div>
 
     <div id="historyModal" class="modal">
@@ -747,19 +742,6 @@
                     <li>Tap "Add" to confirm</li>
                 </ul>
             </div>
-        </div>
-    </div>
-
-    <!-- Channel Videos Section -->
-    <div class="youtube-section">
-        <h2>Channel Videos</h2>
-        <div class="video-container">
-            <iframe
-                src="https://www.youtube.com/embed/?listType=user_uploads&list=UCxN9_iczX0aQx0sPXrE0_kw"
-                title="Lottery Sambad Channel"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-            </iframe>
         </div>
     </div>
 
@@ -1736,6 +1718,112 @@
         function hideInstallInstructions() {
             document.getElementById('installModal').style.display = 'none';
         }
+
+        // Add live stream check function
+        function checkLiveStream() {
+            const iframe = document.getElementById('player');
+            const container = document.getElementById('liveStreamContainer');
+            
+            if (iframe && container) {
+                // Check if the iframe has loaded content
+                iframe.onload = function() {
+                    try {
+                        // If we can access the iframe content, the stream is live
+                        if (iframe.contentWindow) {
+                            container.style.display = 'block';
+                        } else {
+                            container.style.display = 'none';
+                        }
+                    } catch (e) {
+                        // If there's an error, the stream is probably not live
+                        container.style.display = 'none';
+                    }
+                };
+            }
+        }
+
+        // Check live stream status on page load and periodically
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLiveStream();
+            // Check every 5 minutes
+            setInterval(checkLiveStream, 5 * 60 * 1000);
+        });
+    </script>
+    <!-- Add YouTube iframe API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player;
+        let isPlayerReady = false;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                    'autoplay': 1,
+                    'mute': 0,
+                    'controls': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            isPlayerReady = true;
+            checkLiveStream();
+        }
+
+        function onPlayerStateChange(event) {
+            const container = document.getElementById('liveStreamContainer');
+            // PLAYING = 1, ENDED = 0
+            if (event.data === 1) {
+                container.style.display = 'block';
+            } else if (event.data === 0) {
+                container.style.display = 'none';
+            }
+        }
+
+        function onPlayerError(event) {
+            console.log('Player error:', event.data);
+            const container = document.getElementById('liveStreamContainer');
+            container.style.display = 'none';
+        }
+
+        function checkLiveStream() {
+            if (!isPlayerReady || !player) return;
+
+            const channelId = 'UCxN9_iczX0aQx0sPXrE0_kw';
+            const container = document.getElementById('liveStreamContainer');
+
+            try {
+                // Load the live stream
+                player.loadVideoByUrl(`https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=0`);
+                
+                // Check if video is actually playing after a short delay
+                setTimeout(() => {
+                    const state = player.getPlayerState();
+                    if (state === YT.PlayerState.PLAYING) {
+                        container.style.display = 'block';
+                    } else {
+                        container.style.display = 'none';
+                    }
+                }, 2000);
+            } catch (e) {
+                console.error('Error checking live stream:', e);
+                container.style.display = 'none';
+            }
+        }
+
+        // Check live stream status on page load and periodically
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial check will happen when player is ready
+            // Check every 5 minutes
+            setInterval(checkLiveStream, 5 * 60 * 1000);
+        });
     </script>
 </body>
 </html> 
