@@ -1,10 +1,12 @@
 const CACHE_NAME = 'counter-app-v1';
 const ASSETS_TO_CACHE = [
     './',
-    'index.html',
-    'manifest.json',
-    'icons/icon-192.png',
-    'icons/icon-512.png'
+    './index.html',
+    './manifest.json',
+    './icons/icon-192.png',
+    './icons/icon-512.png',
+    'https://html2canvas.hertzen.com/dist/html2canvas.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
 // Install event - cache assets
