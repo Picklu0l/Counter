@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daily Counter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #000000;
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #e5e5e5;
+            --accent-color: #f5f5f5;
+            --success-color: #00a878;
+            --danger-color: #ff4d4d;
+            --spacing: 1.5rem;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 0.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        .home-buttons {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .date-display {
+            text-align: center;
+            margin-bottom: var(--spacing);
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.5rem;
+            background: var(--accent-color);
+            border-radius: var(--border-radius);
+        }
+
+        .section-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            padding: 0.8rem;
+            background: var(--background-color);
+            border: 2px solid var(--primary-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: var(--border-radius);
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .grid-container {
+            display: none;
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            table-layout: fixed;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        .grid td, .grid th {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            width: 40px;
+            height: 40px;
+            touch-action: manipulation;
+        }
+
+        .grid th {
+            background: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .editable {
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .editable:hover, .editable:active {
+            background: var(--accent-color);
+        }
+
+        .sum-column {
+            background: var(--accent-color);
+            font-weight: 500;
+            width: 80px !important;
+        }
+
+        .calculation-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .calculation-input {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calculation-input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .calculation-input label {
+            font-size: 1rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .calculation-input input {
+            width: 80px;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            text-align: center;
+            font-size: 1.1rem;
+            border-radius: var(--border-radius);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .calculation-labels {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            text-align: center;
+            padding: 1rem;
+            background: var(--accent-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .calculation-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            }
+
+            .result-item {
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+        }
+
+        .final-totals {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .final-totals h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .multiplier-header {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .multiplier-label {
+            text-align: center;
+            padding: 1rem;
+            background: var(--accent-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .section-row {
+            display: grid;
+            grid-template-columns: 100px repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+            align-items: center;
+        }
+
+        .section-label {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .total-value {
+            padding: 0.8rem;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #ffffff;
+                --background-color: #000000;
+                --text-color: #ffffff;
+                --border-color: #333333;
+                --accent-color: #1a1a1a;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .section-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .grid td, .grid th {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+                width: 32px;
+                height: 32px;
+            }
+
+            .section-row {
+                grid-template-columns: 80px repeat(2, 1fr);
+                gap: 0.5rem;
+        }
+
+        .calculation-input {
+                gap: 0.8rem;
+            }
+
+            .button-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .button-group button {
+                flex: 1;
+                min-width: 0;
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .action-buttons button {
+                width: 100%;
+                max-width: none;
+            }
+
+            .total-value {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .result-item, .total-value {
+            transition: all 0.3s ease-out;
+        }
+        
+        .result-item.positive, .total-value.positive {
+            background-color: rgba(0, 168, 120, 0.1);
+        }
+        
+        .result-item.negative, .total-value.negative {
+            background-color: rgba(255, 77, 77, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+        }
+
+        .history-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-section h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            background: var(--accent-color);
+        }
+
+        .history-date {
+            font-weight: 500;
+        }
+
+        .history-sections {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .history-section-label {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background: var(--accent-color);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--background-color);
+            margin: 15% auto;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            border-radius: var(--border-radius);
+        }
+
+        .close-button {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+            border: none;
+            background: none;
+        }
+
+        .history-button {
+            width: 100%;
+            margin-top: 2rem;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .input-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .input-modal-content {
+            background-color: var(--background-color);
+            margin: 30% auto;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 300px;
+            position: relative;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .input-modal input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .input-modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .input-modal-buttons button {
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .action-buttons button:hover {
+            background: #ffffff !important;
+            color: #000000 !important;
+            transition: all 0.3s ease;
+        }
+
+        .action-buttons button:active {
+            transform: scale(0.98);
+            background: #f5f5f5 !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .action-buttons button {
+                background: #ffffff !important;
+                color: #000000 !important;
+                border-color: #ffffff !important;
+            }
+            
+            .action-buttons button:hover {
+                background: #000000 !important;
+                color: #ffffff !important;
+                border-color: #ffffff !important;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .action-buttons button {
+                padding: 0.8rem !important;
+                font-size: 0.9rem !important;
+                width: 100% !important;
+                max-width: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="homeScreen" class="home-buttons">
+        <div class="date-display" id="dateDisplay"></div>
+        <div class="section-buttons">
+        <button onclick="showGrid('Morning')">Morning</button>
+        <button onclick="showGrid('Day')">Day</button>
+        <button onclick="showGrid('Night')">Night</button>
+        </div>
+        <div class="final-totals">
+            <h2>Final Totals</h2>
+            <div class="multiplier-header">
+                <div class="multiplier-label">10.05</div>
+                <div class="multiplier-label">9.5</div>
+            </div>
+            <div class="section-totals">
+                <div class="section-row">
+                    <div class="section-label">Morning</div>
+                    <div id="morning1005" class="total-value">-</div>
+                    <div id="morning95" class="total-value">-</div>
+                </div>
+                <div class="section-row">
+                    <div class="section-label">Day</div>
+                    <div id="day1005" class="total-value">-</div>
+                    <div id="day95" class="total-value">-</div>
+                </div>
+                <div class="section-row">
+                    <div class="section-label">Night</div>
+                    <div id="night1005" class="total-value">-</div>
+                    <div id="night95" class="total-value">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="final-totals">
+            <h2>Combined Totals</h2>
+            <div class="date-total-row" style="display: grid; grid-template-columns: 120px repeat(2, 1fr); gap: 2rem; margin-bottom: 1rem; align-items: center;">
+                <div class="section-label">Date</div>
+                <div id="totalDate1005" class="total-value" style="font-weight: bold;"></div>
+                <div id="totalDate95" class="total-value" style="font-weight: bold;"></div>
+            </div>
+            <div style="margin: 1rem 0; border-bottom: 1px solid var(--border-color);"></div>
+            <div class="section-row">
+                <div class="section-label">MORNING</div>
+                <div id="morningTotal1005" class="total-value">-</div>
+                <div id="morningTotal95" class="total-value">-</div>
+            </div>
+            <div style="margin: 1rem 0; border-bottom: 1px solid var(--border-color);"></div>
+            <div class="section-row">
+                <div class="section-label">DAY</div>
+                <div id="dayTotal1005" class="total-value">-</div>
+                <div id="dayTotal95" class="total-value">-</div>
+            </div>
+            <div style="margin: 1rem 0; border-bottom: 1px solid var(--border-color);"></div>
+            <div class="section-row">
+                <div class="section-label">NIGHT</div>
+                <div id="nightTotal1005" class="total-value">-</div>
+                <div id="nightTotal95" class="total-value">-</div>
+            </div>
+            <div style="margin: 1rem 0; border-bottom: 1px solid var(--border-color);"></div>
+            <div class="section-row" style="margin-top: 1rem;">
+                <div class="section-label" style="font-weight: bold;">FULL TOTAL=</div>
+                <div id="combined1005" class="total-value" style="font-weight: bold;">-</div>
+                <div id="combined95" class="total-value" style="font-weight: bold;">-</div>
+            </div>
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button onclick="exportCombinedTotals()" style="background: #000000; color: #ffffff; border: 2px solid #000000; font-weight: 600; padding: 1rem; width: 50px; min-width: 50px;"><i class="fas fa-image"></i></button>
+                <button onclick="shareCombinedTotalsViaWhatsApp()" style="background: #000000; color: #ffffff; border: 2px solid #000000; font-weight: 600; padding: 1rem; width: 50px; min-width: 50px;"><i class="fab fa-whatsapp"></i></button>
+            </div>
+        </div>
+        <button class="history-button" onclick="showHistory()">History</button>
+    </div>
+
+    <div id="gridScreen" class="grid-container">
+        <div class="grid-header">
+            <button class="back-button" onclick="showHome()" style="padding: 0.5rem 1rem; font-size: 1.5rem;"><i class="fas fa-arrow-left"></i></button>
+            <div class="section-header" id="sectionHeader"></div>
+            <div class="date-display" id="dateDisplayGrid"></div>
+        </div>
+            <table class="grid" id="dataGrid"></table>
+            <div class="calculation-box">
+                <div class="calculation-input">
+                    <div class="calculation-input-row">
+                        <label for="customValue">Enter Column Number (0-9):</label>
+                        <input type="number" id="customValue" name="customValue" oninput="calculateCustomValue()" min="0" max="9" placeholder="0-9" inputmode="numeric">
+                    </div>
+                    <div class="button-group">
+                        <button onclick="clearSectionData()" style="white-space: nowrap;">Clear Section</button>
+                        <button onclick="clearAllData()" style="white-space: nowrap;">Clear All Sections</button>
+                    </div>
+                </div>
+                <div class="calculation-labels">
+                    <div class="label">10.05</div>
+                    <div class="label">9.5</div>
+                </div>
+                <div class="calculation-results">
+                    <div id="result1005" class="result-item"></div>
+                    <div id="result95" class="result-item"></div>
+                </div>
+                </div>
+        <div class="action-buttons">
+            <button onclick="exportAsImage()" style="width: 50px; min-width: 50px;"><i class="fas fa-image"></i></button>
+            <button onclick="shareViaWhatsApp()" style="width: 50px; min-width: 50px;"><i class="fab fa-whatsapp"></i></button>
+            <button onclick="showInstallInstructions()" style="width: 50px; min-width: 50px;"><i class="fas fa-download"></i></button>
+        </div>
+    </div>
+
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="hideHistory()"><i class="fas fa-times"></i></button>
+            <div class="history-section">
+                <h2>Previous 7 Days</h2>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="inputModal" class="input-modal">
+        <div class="input-modal-content">
+            <h3>Enter Value</h3>
+            <input type="number" id="cellInput" step="any" inputmode="decimal">
+            <div class="input-modal-buttons">
+                <button onclick="cancelCellEdit()">Cancel</button>
+                <button onclick="confirmCellEdit()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="installModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="hideInstallInstructions()"><i class="fas fa-times"></i></button>
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Install Counter App</h2>
+            
+            <div class="step" style="margin-bottom: 1rem; padding: 1rem; background: var(--accent-color); border-radius: 8px;">
+                <strong>For iPhone:</strong>
+                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                    <li>Tap the share button (box with arrow)</li>
+                    <li>Scroll down and tap "Add to Home Screen"</li>
+                    <li>Tap "Add" in the top right</li>
+                </ul>
+            </div>
+
+            <div class="step" style="padding: 1rem; background: var(--accent-color); border-radius: 8px;">
+                <strong>For Android:</strong>
+                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                    <li>Tap the menu (three dots)</li>
+                    <li>Tap "Add to Home screen"</li>
+                    <li>Tap "Add" to confirm</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSection = '';
+        let gridData = {
+            Morning: Array(100).fill(''),
+            Day: Array(100).fill(''),
+            Night: Array(100).fill('')
+        };
+
+        let customValues = {
+            Morning: '',
+            Day: '',
+            Night: ''
+        };
+
+        let historicalData = {};
+        let currentEditCell = null;
+
+        function updateAllSectionTotals() {
+            const sections = ['Morning', 'Day', 'Night'];
+            let total1005 = 0;
+            let total95 = 0;
+            
+            sections.forEach(section => {
+                let sectionTotal = 0;
+                const sectionData = gridData[section];
+                
+                // Calculate total for this section
+                sectionData.forEach(value => {
+                    sectionTotal += parseFloat(value) || 0;
+                });
+                
+                // Get the custom value for this section
+                const customValue = customValues[section];
+                
+                // Calculate multiplied values and column subtraction for this section
+                const multiply1005 = sectionTotal * 10.05;
+                const multiply95 = sectionTotal * 9.5;
+                
+                let finalValue1005 = multiply1005;
+                let finalValue95 = multiply95;
+                
+                if (customValue !== '') {
+                    const columnNumber = parseInt(customValue);
+                    let columnTotal = 0;
+                    for (let i = 0; i < 10; i++) {
+                        columnTotal += parseFloat(sectionData[i * 10 + columnNumber]) || 0;
+                    }
+                    finalValue1005 = multiply1005 - (columnTotal * 100);
+                    finalValue95 = multiply95 - (columnTotal * 100);
+                }
+                
+                // Update the section totals in Final Totals
+                const sectionLower = section.toLowerCase();
+                const elem1005 = document.getElementById(`${sectionLower}1005`);
+                const elem95 = document.getElementById(`${sectionLower}95`);
+                
+                if (elem1005 && elem95) {
+                    elem1005.textContent = formatNumber(multiply1005);
+                    elem95.textContent = formatNumber(multiply95);
+                    elem1005.className = `total-value ${multiply1005 >= 0 ? 'positive' : 'negative'}`;
+                    elem95.className = `total-value ${multiply95 >= 0 ? 'positive' : 'negative'}`;
+                }
+                
+                // Update Combined Totals section for each section
+                const totalElem1005 = document.getElementById(`${sectionLower}Total1005`);
+                const totalElem95 = document.getElementById(`${sectionLower}Total95`);
+                
+                if (totalElem1005 && totalElem95) {
+                    totalElem1005.textContent = formatNumber(finalValue1005);
+                    totalElem95.textContent = formatNumber(finalValue95);
+                    totalElem1005.className = `total-value ${finalValue1005 >= 0 ? 'positive' : 'negative'}`;
+                    totalElem95.className = `total-value ${finalValue95 >= 0 ? 'positive' : 'negative'}`;
+                }
+                
+                // Add to running totals
+                total1005 += finalValue1005;
+                total95 += finalValue95;
+            });
+            
+            // Update FULL TOTAL with the sum of all section totals
+            const combinedElem1005 = document.getElementById('combined1005');
+            const combinedElem95 = document.getElementById('combined95');
+            
+            if (combinedElem1005 && combinedElem95) {
+                combinedElem1005.textContent = formatNumber(total1005);
+                combinedElem95.textContent = formatNumber(total95);
+                combinedElem1005.className = `total-value ${total1005 >= 0 ? 'positive' : 'negative'}`;
+                combinedElem95.className = `total-value ${total95 >= 0 ? 'positive' : 'negative'}`;
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('result1005').textContent = '';
+            document.getElementById('result95').textContent = '';
+            document.getElementById('result1005').className = 'result-item';
+            document.getElementById('result95').className = 'result-item';
+            updateAllSectionTotals();
+        }
+
+        // Load saved data
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const savedData = JSON.parse(localStorage.getItem('gridData'));
+                const savedCustomValues = JSON.parse(localStorage.getItem('customValues'));
+                
+                if (savedData) {
+                    gridData = {
+                        Morning: Array.isArray(savedData.Morning) ? savedData.Morning : Array(100).fill(''),
+                        Day: Array.isArray(savedData.Day) ? savedData.Day : Array(100).fill(''),
+                        Night: Array.isArray(savedData.Night) ? savedData.Night : Array(100).fill('')
+                    };
+                }
+                
+                if (savedCustomValues) {
+                    customValues = savedCustomValues;
+                }
+                
+                // Update all calculations after loading data
+                updateAllSectionTotals();
+                loadHistoricalData();
+        updateDate();
+                
+                // Add event listener for custom value input
+                const customValueInput = document.getElementById('customValue');
+                customValueInput.addEventListener('input', function() {
+                    calculateCustomValue();
+                    updateAllSectionTotals();
+                });
+            } catch (e) {
+                console.error('Error loading saved data:', e);
+            }
+        });
+
+        function updateDate() {
+            const now = new Date();
+            const dateOptions = { 
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            };
+            const dateStr = now.toLocaleDateString('en-GB', dateOptions);
+            document.getElementById('dateDisplay').textContent = dateStr;
+            document.getElementById('dateDisplayGrid').textContent = dateStr;
+            
+            // Update the date in the Combined Totals section
+            const dateLabel = document.querySelector('.date-total-row .section-label');
+            if (dateLabel) {
+                dateLabel.textContent = 'Date';
+            }
+            
+            // Update the multiplier labels in the Combined Totals section
+            document.getElementById('totalDate1005').textContent = '10.05';
+            document.getElementById('totalDate95').textContent = '9.5';
+        }
+
+        function createGrid() {
+            const table = document.getElementById('dataGrid');
+            const sectionHeader = document.getElementById('sectionHeader');
+            table.innerHTML = '';
+            sectionHeader.textContent = currentSection;
+
+            // Column headers
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<th></th>' + 
+                Array.from({length: 10}, (_, i) => `<th>${i}</th>`).join('') +
+                '<th>Sum</th>';
+            table.appendChild(headerRow);
+
+            // Data rows
+            for (let row = 0; row < 10; row++) {
+                const dataRow = document.createElement('tr');
+                dataRow.innerHTML = 
+                    `<th>${row}</th>` + 
+                    Array.from({length: 10}, (_, col) => {
+                        const index = row * 10 + col;
+                        const value = gridData[currentSection][index] || '';
+                        return `<td class="editable" data-index="${index}" onclick="editCell(this)">${value}</td>`;
+                    }).join('') +
+                    '<td class="sum-column">0</td>';
+                table.appendChild(dataRow);
+            }
+
+            // Column totals row
+            const columnTotalsRow = document.createElement('tr');
+            columnTotalsRow.innerHTML = 
+                '<th>Col Σ</th>' + 
+                Array.from({length: 10}, () => '<td class="sum-column column-total">0</td>').join('') +
+                '<td class="sum-column grand-total">0</td>';
+            table.appendChild(columnTotalsRow);
+
+                updateAllSums();
+            }
+
+        function updateAllSums() {
+            const rows = document.getElementsByTagName('tr');
+            // Update row sums
+            for (let i = 1; i <= 10; i++) {
+                updateRowSum(rows[i]);
+            }
+            // Update column totals
+            updateColumnTotals();
+        }
+
+        function formatNumber(num) {
+            const formatted = parseFloat(num).toFixed(1);
+            return formatted.replace(/\.0$/, '');
+        }
+
+        function editCell(cell) {
+            currentEditCell = cell;
+            const inputModal = document.getElementById('inputModal');
+            const cellInput = document.getElementById('cellInput');
+            
+            // Set the current value in the input
+            cellInput.value = cell.textContent || '';
+            
+            // Show the modal
+            inputModal.style.display = 'block';
+            
+            // Focus and select the input
+            cellInput.focus();
+            cellInput.select();
+            
+            // Add enter key listener
+            cellInput.onkeyup = function(e) {
+                if (e.key === 'Enter') {
+                    confirmCellEdit();
+                } else if (e.key === 'Escape') {
+                    cancelCellEdit();
+                }
+            };
+        }
+
+        function confirmCellEdit() {
+            const cellInput = document.getElementById('cellInput');
+            const value = cellInput.value;
+            
+            if (value !== '') {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue)) {
+                    currentEditCell.textContent = formatNumber(numValue);
+                    const index = parseInt(currentEditCell.getAttribute('data-index'));
+                    gridData[currentSection][index] = formatNumber(numValue);
+                    
+                    // Update everything immediately
+                    updateRowSum(currentEditCell.parentElement);
+                    updateColumnTotals();
+                    updateSectionTotals();
+                    updateAllSectionTotals();
+                    
+                    // Recalculate custom value results if there's a value entered
+                    if (document.getElementById('customValue').value) {
+                        calculateCustomValue();
+                    }
+                    saveData();
+                }
+            }
+            
+            // Hide the modal and reset
+            cancelCellEdit();
+        }
+
+        function cancelCellEdit() {
+            const inputModal = document.getElementById('inputModal');
+            const cellInput = document.getElementById('cellInput');
+            
+            inputModal.style.display = 'none';
+            cellInput.value = '';
+            currentEditCell = null;
+            cellInput.onkeyup = null;
+        }
+
+        // Add click outside to close
+        document.getElementById('inputModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cancelCellEdit();
+            }
+        });
+
+        function updateRowSum(row) {
+            let sum = 0;
+            const cells = row.getElementsByClassName('editable');
+            for (let cell of cells) {
+                sum += parseFloat(cell.textContent) || 0;
+            }
+            row.querySelector('.sum-column').textContent = formatNumber(sum);
+        }
+
+        function updateColumnTotals() {
+            const rows = document.getElementsByTagName('tr');
+            const columnTotals = new Array(10).fill(0);
+            let grandTotal = 0;
+
+            // Calculate column totals and grand total
+            for (let row = 1; row <= 10; row++) {
+                const cells = rows[row].getElementsByClassName('editable');
+                for (let col = 0; col < 10; col++) {
+                    const value = parseFloat(cells[col].textContent) || 0;
+                    columnTotals[col] += value;
+                    grandTotal += value;
+                }
+            }
+
+            // Update column totals display
+            const totalCells = document.getElementsByClassName('column-total');
+            columnTotals.forEach((total, index) => {
+                totalCells[index].textContent = formatNumber(total);
+            });
+
+            // Update grand total
+            document.querySelector('.grand-total').textContent = formatNumber(grandTotal);
+            
+            // Update everything immediately
+            updateSectionTotals();
+            updateAllSectionTotals();
+            
+            // Recalculate custom value if it exists
+            if (document.getElementById('customValue').value) {
+                calculateCustomValue();
+            }
+        }
+
+        function calculateCustomValue() {
+            const input = document.getElementById('customValue');
+            const columnNumber = parseInt(input.value);
+            
+            customValues[currentSection] = input.value;
+            saveData();
+            
+            if (!input.value) {
+                clearResults();
+                updateAllSectionTotals();
+                return;
+            }
+            
+            if (isNaN(columnNumber) || columnNumber < 0 || columnNumber > 9) {
+                clearResults();
+                if (input.value !== '') {
+                    input.value = input.value.slice(0, 1);
+                    calculateCustomValue();
+                }
+                return;
+            }
+
+            const columnTotalCell = document.getElementsByClassName('column-total')[columnNumber];
+            const columnTotal = parseFloat(columnTotalCell.textContent) || 0;
+            const totalSum = parseFloat(document.querySelector('.grand-total').textContent) || 0;
+
+            // Calculate results
+            const result1005 = (totalSum * 10.05) - (columnTotal * 100);
+            const result95 = (totalSum * 9.5) - (columnTotal * 100);
+
+            // Update results immediately without animation
+            updateResult('result1005', result1005);
+            updateResult('result95', result95);
+            
+            // Update everything immediately
+            updateSectionTotals();
+            updateAllSectionTotals();
+        }
+
+        function updateResult(elementId, value) {
+            const element = document.getElementById(elementId);
+            element.textContent = formatNumber(value);
+            element.className = `result-item ${value >= 0 ? 'positive' : 'negative'}`;
+        }
+
+        function updateSectionTotals() {
+            const grandTotal = parseFloat(document.querySelector('.grand-total').textContent) || 0;
+            
+            // Calculate totals for both multipliers
+            const multiply1005 = grandTotal * 10.05;
+            const multiply95 = grandTotal * 9.5;
+
+                const section = currentSection.toLowerCase();
+                const elem1005 = document.getElementById(`${section}1005`);
+                const elem95 = document.getElementById(`${section}95`);
+                
+                if (elem1005 && elem95) {
+                // Update immediately without animation
+                elem1005.textContent = formatNumber(multiply1005);
+                elem95.textContent = formatNumber(multiply95);
+                elem1005.className = `total-value ${multiply1005 >= 0 ? 'positive' : 'negative'}`;
+                elem95.className = `total-value ${multiply95 >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update everything immediately
+            updateAllSectionTotals();
+        }
+
+        // Remove all animation functions and use immediate updates
+        function updateTotalWithAnimation(element, value) {
+            element.textContent = formatNumber(value);
+            element.className = `total-value ${value >= 0 ? 'positive' : 'negative'}`;
+        }
+
+        function updateResultWithAnimation(elementId, value) {
+            const element = document.getElementById(elementId);
+            element.textContent = formatNumber(value);
+            element.className = `result-item ${value >= 0 ? 'positive' : 'negative'}`;
+        }
+
+        function showGrid(section) {
+            currentSection = section;
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('gridScreen').style.display = 'block';
+            createGrid();
+            document.getElementById('customValue').value = customValues[section] || '';
+            if (customValues[section]) {
+                calculateCustomValue();
+            } else {
+                document.getElementById('result1005').textContent = '';
+                document.getElementById('result95').textContent = '';
+                document.getElementById('result1005').className = 'result-item';
+                document.getElementById('result95').className = 'result-item';
+            }
+            updateAllSectionTotals();
+        }
+
+        function showHome() {
+            document.getElementById('gridScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'block';
+            updateAllSectionTotals();
+        }
+
+        function saveData() {
+            localStorage.setItem('gridData', JSON.stringify(gridData));
+            localStorage.setItem('customValues', JSON.stringify(customValues));
+            saveHistoricalData();
+        }
+
+        function clearSectionData() {
+            if (confirm(`Are you sure you want to clear all data from ${currentSection} section?`)) {
+                // Clear only the current section's data
+                gridData[currentSection] = Array(100).fill('');
+                customValues[currentSection] = '';
+                
+                // Clear custom value input
+                document.getElementById('customValue').value = '';
+                
+                // Update the grid and calculations
+                createGrid();
+                clearResults();
+                updateAllSectionTotals();
+                saveData();
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear data from ALL sections? This cannot be undone.')) {
+                gridData = {
+                    Morning: Array(100).fill(''),
+                    Day: Array(100).fill(''),
+                    Night: Array(100).fill('')
+                };
+                customValues = {
+                    Morning: '',
+                    Day: '',
+                    Night: ''
+                };
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        async function exportAsImage() {
+            try {
+                // Create a container for the export
+                const exportContainer = document.createElement('div');
+                exportContainer.style.background = '#ffffff';
+                exportContainer.style.padding = '2rem';
+                exportContainer.style.maxWidth = '800px';
+                exportContainer.style.margin = '0 auto';
+                exportContainer.style.position = 'fixed';
+                exportContainer.style.top = '-9999px';
+                exportContainer.style.left = '-9999px';
+
+                // Add date at the top
+                const dateHeader = document.createElement('div');
+                dateHeader.style.textAlign = 'center';
+                dateHeader.style.marginBottom = '1rem';
+                dateHeader.style.fontSize = '1.2rem';
+                dateHeader.style.fontWeight = '500';
+                dateHeader.style.color = '#000000';
+                const now = new Date();
+                const dateOptions = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                dateHeader.textContent = now.toLocaleDateString('en-US', dateOptions);
+                exportContainer.appendChild(dateHeader);
+
+                // Add section name below date
+                const sectionHeader = document.createElement('div');
+                sectionHeader.style.textAlign = 'center';
+                sectionHeader.style.marginBottom = '2rem';
+                sectionHeader.style.fontSize = '1.4rem';
+                sectionHeader.style.fontWeight = '600';
+                sectionHeader.style.color = '#000000';
+                sectionHeader.textContent = currentSection;
+                exportContainer.appendChild(sectionHeader);
+
+                // Clone the grid
+                const grid = document.getElementById('dataGrid').cloneNode(true);
+                grid.style.width = '100%';
+                grid.style.marginBottom = '2rem';
+                grid.style.borderCollapse = 'collapse';
+                exportContainer.appendChild(grid);
+
+                // Create calculation results box
+                const calcBox = document.createElement('div');
+                calcBox.style.border = '1px solid #000';
+                calcBox.style.padding = '1rem';
+                calcBox.style.marginTop = '2rem';
+
+                // Create results grid
+                const resultsGrid = document.createElement('div');
+                resultsGrid.style.display = 'grid';
+                resultsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                resultsGrid.style.gap = '2rem';
+                resultsGrid.style.margin = '1rem';
+
+                // Add multiplier labels
+                const label1005 = document.createElement('div');
+                label1005.style.background = '#f5f5f5';
+                label1005.style.padding = '1rem';
+                label1005.style.textAlign = 'center';
+                label1005.style.fontWeight = '500';
+                label1005.style.color = '#000000';
+                label1005.textContent = '10.05';
+
+                const label95 = document.createElement('div');
+                label95.style.background = '#f5f5f5';
+                label95.style.padding = '1rem';
+                label95.style.textAlign = 'center';
+                label95.style.fontWeight = '500';
+                label95.style.color = '#000000';
+                label95.textContent = '9.5';
+
+                // Add result values
+                const result1005 = document.createElement('div');
+                result1005.style.padding = '1.5rem';
+                result1005.style.textAlign = 'center';
+                result1005.style.border = '1px solid #000';
+                const result1005Value = document.getElementById('result1005').textContent;
+                const isPositive1005 = parseFloat(result1005Value) >= 0;
+                result1005.style.backgroundColor = isPositive1005 ? 'rgba(0, 168, 120, 0.1)' : 'rgba(255, 77, 77, 0.1)';
+                result1005.style.color = isPositive1005 ? '#00a878' : '#ff4d4d';
+                result1005.textContent = result1005Value;
+
+                const result95 = document.createElement('div');
+                result95.style.padding = '1.5rem';
+                result95.style.textAlign = 'center';
+                result95.style.border = '1px solid #000';
+                const result95Value = document.getElementById('result95').textContent;
+                const isPositive95 = parseFloat(result95Value) >= 0;
+                result95.style.backgroundColor = isPositive95 ? 'rgba(0, 168, 120, 0.1)' : 'rgba(255, 77, 77, 0.1)';
+                result95.style.color = isPositive95 ? '#00a878' : '#ff4d4d';
+                result95.textContent = result95Value;
+
+                // Assemble results grid
+                resultsGrid.appendChild(label1005);
+                resultsGrid.appendChild(label95);
+                resultsGrid.appendChild(result1005);
+                resultsGrid.appendChild(result95);
+
+                calcBox.appendChild(resultsGrid);
+                exportContainer.appendChild(calcBox);
+
+                // Add to document
+                document.body.appendChild(exportContainer);
+
+                // Configure html2canvas options
+                const options = {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    onclone: function(clonedDoc) {
+                        const container = clonedDoc.body.lastElementChild;
+                        
+                        // Style all grid cells
+                        container.querySelectorAll('td, th').forEach(cell => {
+                            cell.style.border = '1px solid #000';
+                            cell.style.padding = '0.75rem';
+                            cell.style.textAlign = 'center';
+                            cell.style.width = '60px';
+                            cell.style.height = '60px';
+                            if (cell.classList.contains('sum-column') || cell.tagName === 'TH') {
+                                cell.style.backgroundColor = '#ffffff';
+                                cell.style.color = '#000000';
+                            } else {
+                                cell.style.backgroundColor = '#ffffff';
+                                cell.style.color = '#000000';
+                            }
+                        });
+                    }
+                };
+
+                const canvas = await html2canvas(exportContainer, options);
+                const image = canvas.toDataURL('image/png');
+                
+                // Remove the temporary container
+                document.body.removeChild(exportContainer);
+                
+                // Create download link
+                const link = document.createElement('a');
+                const dateStr = new Date().toISOString().split('T')[0];
+                link.download = `Counter_${currentSection}_${dateStr}.png`;
+                link.href = image;
+                link.click();
+            } catch (error) {
+                console.error('Error exporting image:', error);
+                alert('Failed to export image. Please try again.');
+            }
+        }
+
+        function shareViaWhatsApp() {
+            const date = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
+            
+            const grandTotal = document.querySelector('.grand-total').textContent;
+            const result1005 = document.getElementById('result1005').textContent;
+            const result95 = document.getElementById('result95').textContent;
+            
+            const message = `Counter Report - ${currentSection}\n` +
+                          `Date: ${date}\n` +
+                          `Total: ${grandTotal}\n` +
+                          `10.05 Result: ${result1005}\n` +
+                          `9.5 Result: ${result95}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+        }
+
+        function saveHistoricalData() {
+            const currentDate = new Date().toISOString().split('T')[0];
+            
+            // Create a deep copy of the current data
+            const dataToSave = {
+                date: currentDate,
+                data: JSON.parse(JSON.stringify(gridData)),
+                customValues: JSON.parse(JSON.stringify(customValues))
+            };
+            
+            // Load existing historical data
+            let existingHistory = {};
+            try {
+                existingHistory = JSON.parse(localStorage.getItem('historicalData')) || {};
+            } catch (e) {
+                console.error('Error loading existing history:', e);
+            }
+            
+            // Add or update today's data
+            existingHistory[currentDate] = dataToSave;
+            
+            // Save back to localStorage
+            try {
+                localStorage.setItem('historicalData', JSON.stringify(existingHistory));
+                historicalData = existingHistory;
+                updateHistoryList();
+            } catch (e) {
+                console.error('Error saving historical data:', e);
+            }
+        }
+
+        function loadHistoricalData() {
+            try {
+                const savedHistoricalData = JSON.parse(localStorage.getItem('historicalData'));
+                if (savedHistoricalData && Object.keys(savedHistoricalData).length > 0) {
+                    historicalData = savedHistoricalData;
+                    console.log('Loaded historical data:', historicalData);
+                    updateHistoryList();
+                } else {
+                    console.log('No historical data found');
+                }
+            } catch (e) {
+                console.error('Error loading historical data:', e);
+            }
+        }
+
+        function updateHistoryList() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+
+            // Sort dates in descending order
+            const sortedDates = Object.keys(historicalData).sort((a, b) => new Date(b) - new Date(a));
+            
+            // Take only the last 7 days
+            const recentDates = sortedDates.slice(0, 7);
+
+            recentDates.forEach(date => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                historyItem.innerHTML = `
+                    <div class="history-date">${formattedDate}</div>
+                    <div class="history-sections">
+                        <span class="history-section-label">Morning</span>
+                        <span class="history-section-label">Day</span>
+                        <span class="history-section-label">Night</span>
+                    </div>
+                `;
+
+                historyItem.onclick = () => loadHistoricalDate(date);
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        function loadHistoricalDate(date) {
+            if (historicalData[date]) {
+                if (confirm(`Load data from ${new Date(date).toLocaleDateString()}?`)) {
+                    gridData = JSON.parse(JSON.stringify(historicalData[date].data));
+                    customValues = JSON.parse(JSON.stringify(historicalData[date].customValues));
+                    updateAllSectionTotals();
+                    hideHistory();
+                }
+            }
+        }
+
+        function showHistory() {
+            document.getElementById('historyModal').style.display = 'block';
+            updateHistoryList();
+        }
+
+        function hideHistory() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('historyModal');
+            if (event.target === modal) {
+                hideHistory();
+            }
+        }
+
+        async function exportCombinedTotals() {
+            try {
+                // Create a container for the export
+                const exportContainer = document.createElement('div');
+                exportContainer.style.background = '#ffffff';
+                exportContainer.style.padding = '2rem';
+                exportContainer.style.maxWidth = '800px';
+                exportContainer.style.margin = '0 auto';
+                exportContainer.style.position = 'fixed';
+                exportContainer.style.top = '-9999px';
+                exportContainer.style.left = '-9999px';
+
+                // Add date at the top
+                const dateHeader = document.createElement('div');
+                dateHeader.style.textAlign = 'center';
+                dateHeader.style.marginBottom = '1rem';
+                dateHeader.style.fontSize = '1.2rem';
+                dateHeader.style.fontWeight = '500';
+                dateHeader.style.color = '#000000';
+                const now = new Date();
+                const dateOptions = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                dateHeader.textContent = now.toLocaleDateString('en-US', dateOptions);
+                exportContainer.appendChild(dateHeader);
+
+                // Create Combined Totals container
+                const combinedTotals = document.createElement('div');
+                combinedTotals.style.background = '#ffffff';
+                combinedTotals.style.border = '1px solid #000';
+                combinedTotals.style.borderRadius = '8px';
+                combinedTotals.style.padding = '2rem';
+
+                // Add title
+                const title = document.createElement('h2');
+                title.textContent = 'Combined Totals';
+                title.style.textAlign = 'center';
+                title.style.marginBottom = '2rem';
+                title.style.fontSize = '1.4rem';
+                title.style.fontWeight = '600';
+                title.style.color = '#000000';
+                combinedTotals.appendChild(title);
+
+                // Add multiplier header
+                const headerRow = document.createElement('div');
+                headerRow.style.display = 'grid';
+                headerRow.style.gridTemplateColumns = '120px repeat(2, 1fr)';
+                headerRow.style.gap = '2rem';
+                headerRow.style.marginBottom = '1rem';
+                headerRow.style.alignItems = 'center';
+
+                const dateLabel = document.createElement('div');
+                dateLabel.textContent = 'Date';
+                dateLabel.style.fontWeight = '500';
+                dateLabel.style.color = '#000000';
+
+                const label1005 = document.createElement('div');
+                label1005.textContent = '10.05';
+                label1005.style.textAlign = 'center';
+                label1005.style.padding = '1rem';
+                label1005.style.background = '#f5f5f5';
+                label1005.style.fontWeight = '500';
+                label1005.style.color = '#000000';
+                label1005.style.borderRadius = '4px';
+
+                const label95 = document.createElement('div');
+                label95.textContent = '9.5';
+                label95.style.textAlign = 'center';
+                label95.style.padding = '1rem';
+                label95.style.background = '#f5f5f5';
+                label95.style.fontWeight = '500';
+                label95.style.color = '#000000';
+                label95.style.borderRadius = '4px';
+
+                headerRow.appendChild(dateLabel);
+                headerRow.appendChild(label1005);
+                headerRow.appendChild(label95);
+                combinedTotals.appendChild(headerRow);
+
+                // Add divider
+                combinedTotals.appendChild(createDivider());
+
+                // Add sections
+                const sections = ['MORNING', 'DAY', 'NIGHT'];
+            sections.forEach(section => {
+                    const sectionLower = section.toLowerCase();
+                    const value1005 = document.getElementById(`${sectionLower}Total1005`).textContent;
+                    const value95 = document.getElementById(`${sectionLower}Total95`).textContent;
+                    combinedTotals.appendChild(createSectionRow(section, value1005, value95));
+                    combinedTotals.appendChild(createDivider());
+                });
+
+                // Add FULL TOTAL
+                const total1005 = document.getElementById('combined1005').textContent;
+                const total95 = document.getElementById('combined95').textContent;
+                const totalRow = createSectionRow('FULL TOTAL=', total1005, total95, true);
+                combinedTotals.appendChild(totalRow);
+
+                exportContainer.appendChild(combinedTotals);
+
+                // Add to document
+                document.body.appendChild(exportContainer);
+
+                // Configure html2canvas options
+                const options = {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                };
+
+                const canvas = await html2canvas(exportContainer, options);
+                const image = canvas.toDataURL('image/png');
+                
+                // Remove the temporary container
+                document.body.removeChild(exportContainer);
+                
+                // Create download link
+                const link = document.createElement('a');
+                const dateStr = new Date().toISOString().split('T')[0];
+                link.download = `Combined_Totals_${dateStr}.png`;
+                link.href = image;
+                link.click();
+            } catch (error) {
+                console.error('Error exporting combined totals:', error);
+                alert('Failed to export combined totals. Please try again.');
+            }
+        }
+
+        // Helper function to create section rows
+        function createSectionRow(label, value1005, value95, isTotal = false) {
+            const row = document.createElement('div');
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = '120px repeat(2, 1fr)';
+            row.style.gap = '2rem';
+            row.style.marginBottom = isTotal ? '0' : '0.8rem';
+            row.style.alignItems = 'center';
+
+            const labelDiv = document.createElement('div');
+            labelDiv.textContent = label;
+            labelDiv.style.fontWeight = isTotal ? '600' : '500';
+            labelDiv.style.fontSize = '1rem';
+            labelDiv.style.color = '#000000';
+
+            const value1005Div = createValueDiv(value1005, isTotal);
+            const value95Div = createValueDiv(value95, isTotal);
+
+            row.appendChild(labelDiv);
+            row.appendChild(value1005Div);
+            row.appendChild(value95Div);
+
+            return row;
+        }
+
+        // Helper function to create value divs
+        function createValueDiv(value, isTotal = false) {
+            const div = document.createElement('div');
+            div.textContent = value;
+            div.style.padding = '0.8rem';
+            div.style.textAlign = 'center';
+            div.style.fontSize = '1rem';
+            div.style.fontWeight = isTotal ? '600' : '500';
+            div.style.border = '1px solid #000';
+            div.style.borderRadius = '4px';
+            
+            const numValue = parseFloat(value);
+            if (!isNaN(numValue)) {
+                if (numValue >= 0) {
+                    div.style.backgroundColor = 'rgba(0, 168, 120, 0.1)';
+                    div.style.color = '#00a878';
+                } else {
+                    div.style.backgroundColor = 'rgba(255, 77, 77, 0.1)';
+                    div.style.color = '#ff4d4d';
+                }
+            }
+            
+            return div;
+        }
+
+        // Helper function to create dividers
+        function createDivider() {
+            const divider = document.createElement('div');
+            divider.style.margin = '1rem 0';
+            divider.style.borderBottom = '1px solid #000';
+            return divider;
+        }
+
+        function shareCombinedTotalsViaWhatsApp() {
+            const date = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
+            
+            const morning1005 = document.getElementById('morningTotal1005').textContent;
+            const morning95 = document.getElementById('morningTotal95').textContent;
+            const day1005 = document.getElementById('dayTotal1005').textContent;
+            const day95 = document.getElementById('dayTotal95').textContent;
+            const night1005 = document.getElementById('nightTotal1005').textContent;
+            const night95 = document.getElementById('nightTotal95').textContent;
+            const total1005 = document.getElementById('combined1005').textContent;
+            const total95 = document.getElementById('combined95').textContent;
+            
+            const message = `Combined Totals Report\n` +
+                          `Date: ${date}\n\n` +
+                          `Morning:\n10.05: ${morning1005}\n9.5: ${morning95}\n\n` +
+                          `Day:\n10.05: ${day1005}\n9.5: ${day95}\n\n` +
+                          `Night:\n10.05: ${night1005}\n9.5: ${night95}\n\n` +
+                          `FULL TOTAL:\n10.05: ${total1005}\n9.5: ${total95}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+        }
+
+        function showInstallInstructions() {
+            document.getElementById('installModal').style.display = 'block';
+        }
+
+        function hideInstallInstructions() {
+            document.getElementById('installModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 
